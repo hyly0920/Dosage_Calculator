@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医疗注射剂量计算器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 650px;
+            overflow: hidden;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(90deg, #1a2980, #26d0ce);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            max-width: 80%;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #ff7e5f, #feb47b);
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #1a2980;
+            font-size: 17px;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group label i {
+            margin-right: 10px;
+            color: #26d0ce;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #1a2980;
+            font-size: 18px;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 17px;
+            transition: all 0.3s;
+            color: #1a2980;
+        }
+
+        input:focus {
+            border-color: #26d0ce;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(38, 208, 206, 0.2);
+        }
+
+        .unit {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #777;
+            font-weight: 500;
+        }
+
+        button {
+            background: linear-gradient(90deg, #1a2980, #26d0ce);
+            color: white;
+            border: none;
+            padding: 18px 25px;
+            border-radius: 12px;
+            width: 100%;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        button i {
+            margin-right: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(26, 41, 128, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result-container {
+            padding: 30px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            border-radius: 15px;
+            margin-top: 25px;
+            display: none;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-title {
+            text-align: center;
+            color: #1a2980;
+            margin-bottom: 25px;
+            font-size: 24px;
+            font-weight: 600;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #dde1e8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .result-title i {
+            margin-right: 12px;
+            color: #26d0ce;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            border-left: 4px solid #26d0ce;
+        }
+
+        .result-card h3 {
+            color: #1a2980;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .result-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a2980;
+        }
+
+        .schedule-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            margin-top: 20px;
+            border-left: 4px solid #ff7e5f;
+        }
+
+        .schedule-card h3 {
+            color: #1a2980;
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .schedule-card h3 i {
+            margin-right: 10px;
+            color: #ff7e5f;
+        }
+
+        .schedule {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ff7e5f;
+            padding: 15px;
+            background: rgba(255, 126, 95, 0.1);
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .additional-info {
+            background: #e8f4fc;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 18px;
+            color: #1a2980;
+            font-weight: 500;
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, #e8f4fc 0%, #d6e8f5 100%);
+            border-left: 4px solid #1a2980;
+            padding: 20px;
+            margin-top: 25px;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .instructions h3 {
+            color: #1a2980;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+
+        .instructions h3 i {
+            margin-right: 10px;
+        }
+
+        .instructions p {
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 25px;
+            color: #7f8c8d;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+            background: #f8f9fa;
+        }
+
+        @media (max-width: 700px) {
+            .container {
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 25px 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>医疗注射剂量计算器</h1>
+            <p>根据患者体重和注射标准计算精确的用药方案</p>
+        </div>
+
+        <div class="form-container">
+            <div class="input-group">
+                <label for="weight"><i class="fas fa-weight-scale"></i> 患者体重</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-user"></i>
+                    <input type="number" id="weight" placeholder="请输入患者体重" min="1" step="0.1">
+                    <span class="unit">kg</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="standard"><i class="fas fa-syringe"></i> 注射标准</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-flask"></i>
+                    <input type="number" id="standard" placeholder="请输入注射标准" min="0.001" step="0.001">
+                    <span class="unit">IU</span>
+                </div>
+            </div>
+
+            <button onclick="calculate()">
+                <i class="fas fa-calculator"></i> 计算注射方案
+            </button>
+
+            <div class="result-container" id="resultContainer">
+                <div class="result-title">
+                    <i class="fas fa-file-medical-alt"></i> 计算结果
+                </div>
+
+                <div class="result-grid">
+                    <div class="result-card">
+                        <h3>注射剂量 (y)</h3>
+                        <div class="result-value" id="yValue">-</div>
+                    </div>
+
+                    <div class="result-card">
+                        <h3>预灌封数 (t)</h3>
+                        <div class="result-value" id="tValue">-</div>
+                    </div>
+                </div>
+
+                <div class="schedule-card">
+                    <h3><i class="fas fa-calendar-check"></i> 用药方案</h3>
+                    <div class="schedule" id="schedule">-</div>
+                    <div class="additional-info" id="additionalInfo"></div>
+                    <p>请严格按照计算方案执行</p>
+                </div>
+
+                <div class="instructions">
+                    <h3><i class="fas fa-info-circle"></i> 用药指导</h3>
+                    <p id="instructionText">请根据计算结果合理安排用药方案。</p>
+                    <p>注意：此计算结果仅供参考，实际用药请遵医嘱。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>医疗注射剂量计算器 &copy; 2023 | 计算结果需经专业医师确认</p>
+        </div>
+    </div>
+
+    <script>
+        function calculate() {
+            // 获取输入值
+            const weight = parseFloat(document.getElementById('weight').value);
+            const standard = parseFloat(document.getElementById('standard').value);
+
+            // 验证输入
+            if (isNaN(weight) || isNaN(standard) || weight <= 0 || standard <= 0) {
+                alert("请输入有效的体重和注射标准值！");
+                return;
+            }
+
+            // 计算 y = kg * IU
+            let y = weight * standard;
+            let additionalDose = 0;
+
+            // 如果y大于10，则不断减去10直到y小于等于10
+            while (y > 10) {
+                y -= 10;
+                additionalDose += 10;
+            }
+
+            // 预灌封数t的定义域
+            const tValues = [3, 4, 5, 6, 8, 10];
+
+            // 找到使t-y为最小的自然数的t
+            let t = null;
+            let minDiff = Number.MAX_VALUE;
+
+            for (const value of tValues) {
+                const diff = value - y;
+                if (diff >= 0 && diff < minDiff) {
+                    minDiff = diff;
+                    t = value;
+                }
+            }
+
+            // 如果没有找到合适的t（理论上不会发生，因为最大值10>=y）
+            if (t === null) {
+                t = 10; // 默认取最大值
+            }
+
+            // 如果t-y等于0，则直接输出"每天都打"
+            if (Math.abs(t - y) < 1e-10) {
+                let outputText = "每天都打";
+                if (additionalDose > 0) {
+                    outputText = `${t + additionalDose}IU每天都打`;
+                } else {
+                    outputText = `${t}IU每天都打`;
+                }
+
+                document.getElementById('yValue').textContent = (weight * standard).toFixed(4);
+                document.getElementById('tValue').textContent = additionalDose > 0 ? `${t}IU + ${additionalDose}IU` : `${t}IU`;
+                document.getElementById('schedule').textContent = outputText;
+
+                if (additionalDose > 0) {
+                    document.getElementById('additionalInfo').textContent = `其中${additionalDose}IU每天都打`;
+                } else {
+                    document.getElementById('additionalInfo').textContent = "";
+                }
+
+                document.getElementById('instructionText').textContent = "根据计算结果，患者需要每天注射。请确保按照医嘱严格执行，并注意观察患者反应。";
+                document.getElementById('resultContainer').style.display = 'block';
+                return;
+            }
+
+            // 计算x和z，使得[y*(x+z)-t*x]的绝对值最小，且x>=1, z>=1
+            let bestX = 1;
+            let bestZ = 1;
+            let minAbs = Number.MAX_VALUE;
+
+            // 尝试x和z从1到100
+            for (let x = 1; x <= 100; x++) {
+                for (let z = 1; z <= 100; z++) {
+                    const value = Math.abs(y * (x + z) - t * x);
+                    if (value < minAbs) {
+                        minAbs = value;
+                        bestX = x;
+                        bestZ = z;
+                    }
+                }
+            }
+
+            // 显示结果
+            document.getElementById('yValue').textContent = (weight * standard).toFixed(4);
+
+            if (additionalDose > 0) {
+                document.getElementById('tValue').textContent = `${t}IU + ${additionalDose}IU`;
+                document.getElementById('schedule').textContent = `${t}IU打${bestX}停${bestZ}`;
+                document.getElementById('additionalInfo').textContent = `同时${additionalDose}IU每天都打`;
+            } else {
+                document.getElementById('tValue').textContent = `${t}IU`;
+                document.getElementById('schedule').textContent = `打${bestX}停${bestZ}`;
+                document.getElementById('additionalInfo').textContent = "";
+            }
+
+            document.getElementById('instructionText').textContent = `根据计算结果，建议用药方案为：${t}IU打${bestX}天停${bestZ}天${additionalDose > 0 ? `，同时${additionalDose}IU每天都打` : ''}。请确保按照医嘱严格执行，并注意观察患者反应。如有任何不适，请立即就医。`;
+            document.getElementById('resultContainer').style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>
